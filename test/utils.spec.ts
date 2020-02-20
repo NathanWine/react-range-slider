@@ -1,10 +1,12 @@
-import { getCoordinates, getValues, num, round } from '../src/utils';
+import { getCoordinates, getNormalizedValue, getPosition, num, round } from '../src/utils';
 
 describe('utils', () => {
   describe('getCoordinates', () => {
     it('should return the event coordinates with MouseEvent', () => {
       const event = new MouseEvent('click');
 
+      // @ts-ignore
+      event.nativeEvent = event;
       expect(getCoordinates(event)).toEqual({ x: 0, y: 0 });
     });
 
@@ -16,7 +18,32 @@ describe('utils', () => {
     });
   });
 
-  describe('getValues', () => {
+  describe('getNormalizedValue', () => {
+    const props = {
+      x: 10,
+      xMax: 100,
+      xMin: 0,
+      y: 10,
+      yMax: 20,
+      yMin: -5,
+    };
+
+    expect(
+      getNormalizedValue('x', {
+        ...props,
+        x: 120,
+      }),
+    ).toBe(100);
+
+    expect(
+      getNormalizedValue('y', {
+        ...props,
+        y: -10,
+      }),
+    ).toBe(-5);
+  });
+
+  describe('getPosition', () => {
     const props = {
       axis: 'x' as const,
       onChange: () => undefined,
@@ -40,15 +67,15 @@ describe('utils', () => {
     };
 
     it('should return x,y values', () => {
-      expect(getValues({ x: 10, y: 10 }, props, rect)).toEqual({
+      expect(getPosition({ x: 10, y: 10 }, props, rect)).toEqual({
         x: 50,
         y: 0,
       });
-      expect(getValues({ x: -10, y: -10 }, { ...props, axis: 'y' }, rect)).toEqual({
+      expect(getPosition({ x: -10, y: -10 }, { ...props, axis: 'y' }, rect)).toEqual({
         x: 0,
         y: 0,
       });
-      expect(getValues({ x: 110, y: 110 }, { ...props, axis: 'xy' }, rect)).toEqual({
+      expect(getPosition({ x: 110, y: 110 }, { ...props, axis: 'xy' }, rect)).toEqual({
         x: 100,
         y: 100,
       });
